@@ -6,5 +6,10 @@ Este repositorio contiene todo el proyecto de la aplicación web dash. El cual, 
 
 Para desarrollar este proyecto se utilizarón las siguiente estructura
 - Front-End: HTML, CSS, JS
-- Back-End: Python, Flask, MySQL, Apache/Nginx
+- Back-End: Python, Flask, MySQL, /Nginx
 - Deployment: Ubuntu Server 20 LTS
+
+# Fase del proyecto v1.0
+
+Se esta trabajando en la solución en la conexión a la base de datos de MySQL Server
+Se esta trabajando en el entorno del despliegue de la aplicación Web con Ubuntu Server
