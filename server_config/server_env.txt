@@ -72,6 +72,7 @@ python3 -m venv venv
 source venv/bin/activate
 sudo pip3 install flask
 sudo pip3 install wheel
+sudo pip3 install gunicorn
 pip3 install dash
 pip3 install -r requirements.txt
 pip3 list
@@ -82,6 +83,39 @@ export FLASK_APP=app.py
 # Se ejecuta el comando de Flask para correr de forma local el proyecto
 flask run --host=0.0.0.0
 
-# Se instala Gunicorn
-# Se crea el archivo .service
-# Se crea el scritp de Nginx
+# Se crea un entorno de pruebas, en el cual, se ejecuta la "app.py", estas se ejecutan en el puerto 5000
+pyhton app.py
+
+# Ahora creamos el archivo "wsgi.py", y colocamos los valores que vienen por defecto en el ejemplo
+# Al finalizar colocamos Gunicorn con un ambiente de pruebas con el puerto 5000 y la IP del server
+nano wsgi.py
+gunicorn --bind 0.0.0.0:5000 wsgi:app
+# Ctrl + C para finalizar
+
+# Desactivamos el entorno de pruebas para configurar el servidor
+# Ingresamos los parametros del archivo "app.service" y luego ejecutamos el servicio
+deactivate
+sudo nano /etc/systemd/system/app.service
+sudo systemctl daemon-reload
+sudo systemctl start app.service
+sudo systemctl enable app.service
+sudo systemctl status app.service
+
+# Se crea el scritp de Nginx para el Web Server
+sudo nano /etc/nginx/sites-available/app.conf
+sudo ln -s /etc/nginx/sites-available/app.conf /etc/nginx/sites-enabled/
+
+# Verificamos el estatus de Nginx
+sudo nginx -t
+
+# En dado caso de no funcionar el Web Server, se requiere ejecutar permisos al directorio
+# Comando para verificar el Log del sistema y Nginx
+sudo tail /var/log/nginx/error.log
+
+# Ejecución de permisos en el directorio
+sudo chmod 775 /home/angsiserver
+
+# Se configura el Firewall (solo en producción)
+sudo ufw delet allow 5000
+sudo ufw allow "Nginx Full"
+sudo ufw status verbose
