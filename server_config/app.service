@@ -1,0 +1,18 @@
+#Se requiere cambiar los directorio por los que se usarán en el proyecto
+# /home/angsiserver/dash_project
+# unix:app.sock
+# Se requiere cambiar el nombre del usuario por el que se creo para el proyecto
+
+[Unit]
+Description=Gunicorn instance to serve app Flask app
+After=network.target
+
+[Service]
+User=angsiserver
+Group=www-data
+WorkingDirectory=/home/angsiserver/project
+Environment="PATH=/home/angsiserver/project/venv/bin"
+ExecStart=/home/angsiserver/project/venv/bin/gunicorn --workers 3 --bind unix:peak.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
