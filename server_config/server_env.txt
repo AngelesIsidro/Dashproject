@@ -7,21 +7,26 @@ systemctl start ssh
 systemctl enable ssh
 systemctl status ssh
 
-# Se instalan los entornos para desplegar la aplicación
-apt install apache2 mysql-server -y
+# Se crea un usuario y se habilitan los permisos de "sudo" a ese usuario
+adduser angsiserver
+usermod -aG sudo angsiserver
+# Ctrl + D para cerrar la sesión del root
 
-# Se habilita el servicio de Apache Server
-systemctl start apache2
-systemctl enable apache2
-systemctl status apache2
+# Una vez logueados con la cuenta creada, se procede a realizar la instalación para crear el entorno
+sudo apt install nginx mysql-server libapache2-mod-wsgi-py3 -y
 
-# Se habilita el servicio MySQL Server
+# Se habilitan los servicios de Nginx y MySQL Server
+systemctl start nginx
+systemctl enable nginx
+systemctl status nginx
 systemctl start mysql
 systemctl enable mysql
 systemctl status mysql
+
+# Se realiza la instalación de MySQL Server
 sudo mysql_secure_installation
 
-# Asignar una contraseña a MySQL
+# Se le asigna una contraseña a MySQL para el usuario root
 mysql
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '12345678';
 FLUSH PRIVILEGES;
@@ -50,35 +55,33 @@ SHOW TABLES;
 SELECT * FROM estadoescolaridad;
 EXIT;
 
+# Una vez importada la BD, nos movemos al directorio que contiene el proyecto
+cd Dashproject/dash_project
+
 # Se prepara el entorno para desplegar Flask y Pyhton
-apt install libapache2-mod-wsgi-py3 -y
 python3 --version
-apt install python3-pip -y
-pip3 list
-sudo pip3 install flask
+sudo apt install python3-pip -y
 pip3 list
 
-# Una vez descargados, se requiere que se mueva a la siguiente ruta el proyecto
-cd Dashproject
-mv dash_project /var/www/html
-cd /var/www/html/dash_project
-
-# Se instalan las siguientes dependencias para la creación de entornos virtuales
-apt install python3.8-venv
-apt install python3-dev
+# Se crea el entorno virtual (virtualenv)
+sudo apt install python3.8-venv python3-dev -y
 pip3 install virtualenv
 
-# Se crea el entorno virutal llamado "venv" dentro de la carpeta del proyecto
+# Creamos el entorno virtual denominado "venv" dentro de la ruta del proyecto
 python3 -m venv venv
-
-# Se activa el entorno virtual y se instalan las dependencias para el proyecto
 source venv/bin/activate
-pip3 install wheel
+sudo pip3 install flask
+sudo pip3 install wheel
 pip3 install dash
 pip3 install -r requirements.txt
+pip3 list
 
 # Se crea un entorno de pruebas, en el cual, se exporta la aplicación llamada "app.py"
 export FLASK_APP=app.py
 
 # Se ejecuta el comando de Flask para correr de forma local el proyecto
 flask run --host=0.0.0.0
+
+# Se instala Gunicorn
+# Se crea el archivo .service
+# Se crea el scritp de Nginx
