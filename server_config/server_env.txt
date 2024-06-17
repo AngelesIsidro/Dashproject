@@ -16,12 +16,12 @@ usermod -aG sudo angsiserver
 sudo apt install nginx mysql-server libapache2-mod-wsgi-py3 -y
 
 # Se habilitan los servicios de Nginx y MySQL Server
-systemctl start nginx
-systemctl enable nginx
-systemctl status nginx
-systemctl start mysql
-systemctl enable mysql
-systemctl status mysql
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
+sudo systemctl start mysql
+sudo systemctl enable mysql
+sudo systemctl status mysql
 
 # Se realiza la instalación de MySQL Server
 sudo mysql_secure_installation
