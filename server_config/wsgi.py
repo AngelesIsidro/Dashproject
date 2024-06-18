@@ -1,5 +1,5 @@
-# En donde se nombra peak, se tiene que modificar por app
-from peak import app
+# Se exporta del archivo "project" la aplicación flask con el nombre "flask_app"
+from project import flask_app
 
 if __name__ == '__main__':
-    app.run()
+   flask_app.run()
