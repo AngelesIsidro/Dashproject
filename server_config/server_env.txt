@@ -84,7 +84,7 @@ export FLASK_APP=app.py
 flask run --host=0.0.0.0
 
 # Se crea un entorno de pruebas, en el cual, se ejecuta la "app.py", estas se ejecutan en el puerto 5000
-pyhton app.py
+python app.py
 
 # Ahora creamos el archivo "wsgi.py", y colocamos los valores que vienen por defecto en el ejemplo
 # Al finalizar colocamos Gunicorn con un ambiente de pruebas con el puerto 5000 y la IP del server
