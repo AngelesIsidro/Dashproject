@@ -9,5 +9,6 @@ def crear_app():
 
 if __name__ == "__main__":
     dash = crear_app()
-    flask_app.run(debug=True)
+    # flask_app.run(debug=True)
+    flask_app.run(host='0.0.0.0', port=5000)
 
