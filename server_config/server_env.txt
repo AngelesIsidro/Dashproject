@@ -44,11 +44,11 @@ git clone https...
 
 # Ingresamos al directorio que contiene el archivo bash para poder ejecutarlo 
 cd /Dashproject/dbscripts/
-chmod +x importar_scripts.sh
-./importar_scripts.sh
+sudo chmod +x importar_scripts.sh
+sudo ./importar_scripts.sh
 
 # Se ingresa la contraseña, luego se verifica la importación
-mysql -u root -p
+sudo mysql -u root -p
 SHOW DATABASES;
 USE sociodemografico;
 SHOW TABLES;
@@ -65,25 +65,16 @@ pip3 list
 
 # Se crea el entorno virtual (virtualenv)
 sudo apt install python3.8-venv python3-dev -y
-sudo pip3 install virtualenv
+pip3 install virtualenv
 
 # Creamos el entorno virtual denominado "venv" dentro de la ruta del proyecto
 python3 -m venv venv
 source venv/bin/activate
-sudo pip3 install flask
-sudo pip3 install wheel
-sudo pip3 install gunicorn
-sudo pip3 install dash
-sudo pip3 install -r requirements.txt
+pip3 install flask wheel gunicorn dash mysql-connector-python
+pip3 install -r requirements.txt
 pip3 list
 
-# Se crea un entorno de pruebas, en el cual, se exporta la aplicación llamada "app.py"
-export FLASK_APP=app.py
-
-# Se ejecuta el comando de Flask para correr de forma local el proyecto
-flask run --host=0.0.0.0
-
-# Se crea un entorno de pruebas, en el cual, se ejecuta la "app.py", estas se ejecutan en el puerto 5000
+# Se ejecuta la "app.py", para poder ver el despliegue en la IP y el puerto: 5000 (IP:5000)
 python app.py
 
 # Ahora creamos el archivo "wsgi.py", y colocamos los valores que vienen por defecto en el ejemplo
