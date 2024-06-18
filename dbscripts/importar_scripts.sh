@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Directorio donde están los scripts
-SCRIPT_DIR="/root/Dashproject/dbscripts/sociodemografico"
+# Directorio donde estan los scripts
+SCRIPT_DIR="/home/angsiserver/Dashproject/dbscripts/sociodemografico"
 
 # Base de Datos a la que se hace conexion
 DATABASE="sociodemografico"
