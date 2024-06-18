@@ -80,7 +80,7 @@ python app.py
 # Ahora creamos el archivo "wsgi.py", y colocamos los valores que vienen por defecto en el ejemplo
 # Al finalizar colocamos Gunicorn con un ambiente de pruebas con el puerto 5000 y la IP del server
 nano wsgi.py
-gunicorn --bind 0.0.0.0:5000 wsgi:app
+gunicorn --bind 0.0.0.0:5000 wsgi:flask_app
 # Ctrl + C para finalizar
 
 # Desactivamos el entorno de pruebas para configurar el servidor
