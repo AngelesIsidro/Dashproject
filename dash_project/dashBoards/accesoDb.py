@@ -19,7 +19,7 @@ config = {
 #    'password': '12345678',
 #    'host': 'localhost',
 #    'database': 'sociodemografico',
-}
+# }
 
 # Obtener las variables de entorno
 # db_user = os.getenv('MYSQLUSER')
