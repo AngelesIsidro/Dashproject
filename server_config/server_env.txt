@@ -1,24 +1,25 @@
 # Creación del entorno y despliegue de aplicación en Web Server
 
-# Se prepara el LXC con los recursos básicos para poder ejecutar las tareas
+# Se prepara el Server con los recursos básicos para poder ejecutar tareas básicas
+# Las primeras configuraciones se hacen mediante la cuenta root
 apt update && apt upgrade -y
 apt-get install net-tools openssh-server tar make gcc nano -y
-systemctl start ssh
-systemctl enable ssh
-systemctl status ssh
 
-# Se crea un usuario y se habilitan los permisos de "sudo" a ese usuario
+# Se crea un usuario y se habilitan los permisos de "sudo" al msimo
+# Puede ser cualquier usuario, sin embargo, se usa el siguiente
 adduser angsiserver
 usermod -aG sudo angsiserver
-# Ctrl + D para cerrar la sesión del root
+# Ctrl + D para cerrar la sesión y entrar con el nuevo user
 
-# Una vez logueados con la cuenta creada, se procede a realizar la instalación para crear el entorno
-sudo apt install nginx mysql-server libapache2-mod-wsgi-py3 -y
+# Una vez logueados con la cuenta creada, se procede a realizar la instalación de las herramientas
+sudo apt install hginx mysql-server libapache2-mod-wsgi-py3 -y
 
-# Se habilitan los servicios de Nginx y MySQL Server
+# Se habilita el servicios de Nginx (Web Server)
 sudo systemctl start nginx
 sudo systemctl enable nginx
 sudo systemctl status nginx
+
+# Se habilita el servicio de MySQL (Gestor DB)
 sudo systemctl start mysql
 sudo systemctl enable mysql
 sudo systemctl status mysql
@@ -32,21 +33,26 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '12345678
 FLUSH PRIVILEGES;
 exit;
 
-# Una vez asiganda la contraseña, se accede con el user root y se crea la BD
+# Una vez asiganda la contraseña, se accede con el user root y se crea la DB
 sudo mysql -u root -p
 CREATE DATABASE IF NOT EXISTS sociodemografico;
 EXIT;
 
 # Se descargan los archivos mediante un git clone desde el repositorio
-# Link GitHub: https://github.com/AngelesIsidro/Dashproject
-apt install git -y
+# Link GitHub: https://github.com/...
+sudo apt install git -y
 git clone https...
 
-# Ingresamos al directorio que contiene el archivo bash para poder ejecutarlo 
-cd /Dashproject/dbscripts/
+# Movemos la carpeta principal del proyecto, denominada "dash_project"
+cd /home/angsiserver/Dashproject
+sudo mv dashproject/ /var/www/
+
+# Ahora, se ingresa al directorio que contiene contiene los scripts de la DB 
+cd /home/angsiserver/Dashproject/dbscripts/
 sudo chmod +x importar_scripts.sh
 sudo ./importar_scripts.sh
 
+# Una vez realizada la migración, se verifica en el gestor MySQL
 # Se ingresa la contraseña, luego se verifica la importación
 sudo mysql -u root -p
 SHOW DATABASES;
@@ -55,8 +61,15 @@ SHOW TABLES;
 SELECT * FROM estadoescolaridad;
 EXIT;
 
-# Una vez importada la BD, nos movemos al directorio que contiene el proyecto
-cd Dashproject/dash_project
+# Creamos un usuario para usar la base de datos en producción
+sudo mysql -u root -p
+CREATE USER 'angsiserver'@'localhost' IDENTIFIED BY '12345678';
+GRANT ALL PRIVILEGES ON sociodemografico.* TO angsiserver@localhost;
+FLUSH PRIVILEGES;
+EXIT;
+
+# Al finalizar la gestión de la DB, nos movemos al directorio que contiene el proyecto
+sudo cd /var/www/dash_project
 
 # Se prepara el entorno para desplegar Flask y Pyhton
 python3 --version
@@ -74,39 +87,50 @@ pip3 install flask wheel gunicorn dash mysql-connector-python
 pip3 install -r requirements.txt
 pip3 list
 
-# Se ejecuta la "app.py", para poder ver el despliegue en la IP y el puerto: 5000 (IP:5000)
-python app.py
+# Se ejecuta la aplicación denominada "project.py", 
+# El puerto para visualizar la aplicación en entorno local es el "5000" (IP:5000)
+python project.py
 
-# Ahora creamos el archivo "wsgi.py", y colocamos los valores que vienen por defecto en el ejemplo
-# Al finalizar colocamos Gunicorn con un ambiente de pruebas con el puerto 5000 y la IP del server
-nano wsgi.py
+# Copiamos al directorio el archivo "wsgi.py", preparado usarse con Gunicorn
+sudo cd /home/angsiserver/Dashproject/server_config
+sudo cp wsgi.py /var/www/dash_project
+sudo cd /var/www/dash_project
+
+# Colocamos Gunicorn con un ambiente de pruebas con el puerto 5000 y la IP del server
 gunicorn --bind 0.0.0.0:5000 wsgi:flask_app
 # Ctrl + C para finalizar
 
 # Desactivamos el entorno de pruebas para configurar el servidor
-# Ingresamos los parametros del archivo "app.service" y luego ejecutamos el servicio
+# Ingresamos a la carpeta de "server_config" y copiamos el archivo "app.service"
 deactivate
-sudo nano /etc/systemd/system/app.service
+sudo cp /home/angsiserver/Dashproject/server_config/app.service /etc/systemd/system/
+
+# Recargamos el Daemon y ejecutamos el servicio de "app.service"
 sudo systemctl daemon-reload
 sudo systemctl start app.service
 sudo systemctl enable app.service
 sudo systemctl status app.service
 
-# Se crea el scritp de Nginx para el Web Server
-sudo nano /etc/nginx/sites-available/app.conf
+# Copiamos el archivo que contiene la configuración del Nginx a la carpeta del Web Server
+sudo cp /home/angsiserver/Dashproject/server_config/app.conf /etc/nginx/sites-avaliable/app.conf
 sudo ln -s /etc/nginx/sites-available/app.conf /etc/nginx/sites-enabled/
 
-# Verificamos el estatus de Nginx
+# Verificamos el estatus de Nginx y los posibles errores
 sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl status nginx
 
-# En dado caso de no funcionar el Web Server, se requiere ejecutar permisos al directorio
 # Comando para verificar el Log del sistema y Nginx
 sudo tail /var/log/nginx/error.log
 
-# Ejecución de permisos en el directorio
+# En dado caso de no funcionar el Web Server, se requiere ejecutar permisos al directorio
 sudo chmod 775 /home/angsiserver
 
-# Se configura el Firewall (solo en producción)
-sudo ufw delet allow 5000
+# Se configura el Firewall para no permitir todas las conexiones hacia el servidor (Solo producción)
+sudo ufw allow ssh
+sudo ufw enable
 sudo ufw allow "Nginx Full"
 sudo ufw status verbose
+
+# Se prueba la web app en la IP pública y automáticamente en el puerto 80 (Nginx)
+# http://217.182.73.58
